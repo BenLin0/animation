@@ -1,0 +1,33 @@
+{"canvas_size":  [300, 200],
+  "fps":  10,
+  "watermark": "@Ben",
+  "events": [
+    {"action":  "add",
+      "time": 0.0,
+      "imgfile":  "sample/img/grass.png",
+      "location":  [0,0],
+      "objectid":  0},
+    {"action":  "add",
+      "time": 3.0,
+      "imgfile":  "sample/img/bunny.png",
+      "location":  [10,0],
+      "objectid":  1},
+    {"action":  "move",
+        "time": 4.0,
+        "objectid":  1,
+        "speed": 10,
+        "moveto": [100,30],
+        "track": "straight",
+        "leavetrace": false
+    },
+    {"action":  "remove",
+        "time": 8.3,
+        "objectid": 1
+    },
+
+    {"action":  "end",
+      "time": 15
+    }
+  ]
+
+}
