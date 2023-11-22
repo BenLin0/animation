@@ -1,4 +1,6 @@
-{"canvas_size":  [300, 200],
+{
+  "jobid": "sample1",
+  "canvas_size":  [200, 300],
   "fps":  10,
   "watermark": "@Ben",
   "events": [
@@ -10,13 +12,21 @@
     {"action":  "add",
       "time": 3.0,
       "imgfile":  "sample/img/bunny.png",
-      "location":  [10,0],
+      "location":  [50,100],
       "objectid":  1},
     {"action":  "move",
         "time": 4.0,
         "objectid":  1,
-        "speed": 10,
+        "endtime": 4.9,
         "moveto": [100,30],
+        "track": "straight",
+        "leavetrace": false
+    },
+        {"action":  "move",
+        "time": 5.0,
+        "objectid":  1,
+        "endtime": 6.8,
+        "moveto": [0,130],
         "track": "straight",
         "leavetrace": false
     },
