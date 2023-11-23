@@ -19,6 +19,10 @@ def initialize(job):
     job["resultfile"] = os.path.join("sample", "output", f"{job['jobid']}.mp4")
     if "fps" not in job:
         job["fps"] = 10
+    if "timestamp" not in job:
+        job["timestamp"] = False
+    if "watermark" not in job:
+        job["watermark"] = ""
     if "canvas_color" not in job:
         job["canvas_color"] = [0,0,0]
     job["objects"] = {}
@@ -62,8 +66,15 @@ def work(job):
                                    [job["canvas_size"][1],  job["canvas_size"][0]]
                                    )
 
-    canvas = np.full((job["canvas_size"][0], job["canvas_size"][1], 3), job["canvas_color"], dtype="uint8")
+    canvas_blank = np.full((job["canvas_size"][0], job["canvas_size"][1], 3), job["canvas_color"], dtype="uint8")
+    if job["watermark"]:
+        cv2.putText(canvas_blank, job["watermark"], (canvas_blank.shape[1] - 100, canvas_blank.shape[0] - 30), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255),
+                    1, cv2.LINE_AA)
+        cv2.putText(canvas_blank, job["watermark"], (canvas_blank.shape[1] - 99, canvas_blank.shape[0] - 29), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 1,
+                    cv2.LINE_AA)
+
     for i in range(job["endframe"]):
+        canvas = copy.deepcopy(canvas_blank)
         for _objectid in job["objects"]:
             _object = job["objects"][_objectid]
             if "endframe" not in _object:
@@ -98,6 +109,14 @@ def work(job):
                 for c in range(0, 3):
                     canvas[y1:y2, x1:x2, c] = (alpha_s * _object["img"][:height, :width, c] +
                                               alpha_l * canvas[y1:y2, x1:x2, c])
+
+        # watermark and timestamp
+
+        if job["timestamp"]:
+            timestamp = "{:8.2f}".format(i / job["fps"])
+            cv2.putText(canvas, timestamp, (20, canvas.shape[0]-30), cv2.FONT_HERSHEY_PLAIN, 1, (255,255,255), 1, cv2.LINE_AA)
+            cv2.putText(canvas, timestamp, (21, canvas.shape[0] - 29), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 1, cv2.LINE_AA)
+
         #cv2.imwrite(os.path.join(job["tempfolder"], f"{i}.png"), canvas)
         video_writer.write(canvas)
     # use ffmpeg to compbine them using the specify fps

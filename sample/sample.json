@@ -4,6 +4,7 @@
   "canvas_color": [255,255,255],
   "fps":  30,
   "watermark": "@Ben",
+  "timestamp": true,
   "events": [
     {"action":  "add",
       "time": 0.0,
