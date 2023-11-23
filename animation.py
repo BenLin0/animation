@@ -1,7 +1,7 @@
 import math
 
 import  numpy as np
-import sys, logging, json, time, os
+import sys, logging, json, time, os, copy
 #from cv2 import cv2
 import cv2
 def calculatemoveendframe( action):
@@ -77,8 +77,9 @@ def work(job):
                 if "moveactions" in _object:
                     for moveaction in _object["moveactions"]:   # there should be only one action at any given time for an object.
                         if moveaction["movestartframe"] <= i <= moveaction["moveendframe"]:
+                            # this is for "straight line" moving.
                             if "movestep" not in moveaction:    # initialize move step base on current location
-                                moveaction["movestartlocation"] = _object['location']
+                                moveaction["movestartlocation"] = copy.deepcopy(_object['location'])
                                 moveaction["movestep"] = calculatemoveendframe( moveaction)
                             _object["location"][0] = int(moveaction["movestartlocation"][0] +  (i-moveaction["movestartframe"]) * moveaction["movestep"][0])
                             _object["location"][1] = int(moveaction["movestartlocation"][1] +  (i-moveaction["movestartframe"]) * moveaction["movestep"][1])
