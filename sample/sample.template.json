@@ -1,0 +1,51 @@
+""" `default` means the key is optional because the default value will be provided."""
+{
+  "jobid": "sample1_big",  # default is a unique id (time). temp folder and the result mp4 file name will be named by it.
+  "canvas_size":  [500, 600],  # required.
+  "canvas_color": [255,255,255],  # default is [0,0,0], which is black
+  "fps":  10, # default is 10
+  "watermark": "@Ben",  # optional
+  "events": [
+    {"action":  "add", # required. add/move/remove/end
+      "time": 0.0,  # required
+      "imgfile":  "sample/img/grass.png", # for action "add" only
+      "location":  [0,0], # required for action "add"
+      "objectid":  0  # for action "add", required to provide a unique objectid.
+    },
+
+    {"action":  "add",
+      "time": 3.0,
+      "imgfile":  "sample/img/bunny.png",
+      "location":  [50,100],
+      "objectid":  1
+    },
+
+    {"action":  "move", # required. add/move/remove/end
+        "time": 4.0, # required
+        "objectid":  1, # required to specify an existing objecid (from action add)
+        "endtime": 4.9, # default is 0, to move immediately. otherwise, this must be greater than "time"
+        "moveto": [100,30], # required
+        "track": "straight",  # to be implemented. straight/arc. default is "straight"
+        "trackarcradius"，   # to be implemented. requried for track arc.
+        "keeptrack": 0   # to be implemented. default is 0 (no track). can keep the trace of the last x steps.
+    },
+
+        {"action":  "move",
+        "time": 5.0,
+        "objectid":  1,
+        "endtime": 6.8,
+        "moveto": [120,130],
+        "track": "straight"
+    },
+
+    {"action":  "remove", # reqruied. add/move/remove/end
+        "time": 8.3,    # required.
+        "objectid": 1   # required to specify an existing objecid (from action add)
+    },
+
+    {"action":  "end",  # reqruied. add/move/remove/end
+      "time": 15        # required.
+    }
+  ]
+
+}

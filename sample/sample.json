@@ -1,7 +1,8 @@
 {
-  "jobid": "sample1",
-  "canvas_size":  [200, 300],
-  "fps":  10,
+  "jobid": "sample1_fps30",
+  "canvas_size":  [400, 600],
+  "canvas_color": [255,255,255],
+  "fps":  30,
   "watermark": "@Ben",
   "events": [
     {"action":  "add",
@@ -26,7 +27,7 @@
         "time": 5.0,
         "objectid":  1,
         "endtime": 6.8,
-        "moveto": [0,130],
+        "moveto": [120,130],
         "track": "straight",
         "leavetrace": false
     },

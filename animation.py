@@ -4,7 +4,7 @@ import  numpy as np
 import sys, logging, json, time, os, copy
 #from cv2 import cv2
 import cv2
-def calculatemoveendframe( action):
+def calculatemovestep( action):
     step = [(action['movetolocation'][0] - action['movestartlocation'][0])/ (action['moveendframe']-action['movestartframe']),
                 (action['movetolocation'][1] - action['movestartlocation'][1])/ (action['moveendframe']-action['movestartframe'])
                 ]
@@ -17,6 +17,10 @@ def initialize(job):
 
     job["tempfolder"] = os.path.join("sample", "output", job["jobid"])
     job["resultfile"] = os.path.join("sample", "output", f"{job['jobid']}.mp4")
+    if "fps" not in job:
+        job["fps"] = 10
+    if "canvas_color" not in job:
+        job["canvas_color"] = [0,0,0]
     job["objects"] = {}
     for event in job["events"]:
         if event["action"] == "add":
@@ -38,26 +42,16 @@ def initialize(job):
                           "moveendtime": event["endtime"],
                           "moveendframe": int(job["fps"] *  event["endtime"]),
                           "movetolocation": event["moveto"],
-
-                          "movecurve": event["track"],  #stright
-                          "moveleavetrace": event["leavetrace"]
+                          "movetrack": event["track"] if "track" in event else "straight",
+                          "movekeeptrack": event["keeptrack"] if "keeptrack" in event else 0
                           }
+
             _object["moveactions"].append(moveaction)
-            # job["objects"][event["objectid"]]["movestarttime"] = event["time"]
-            # job["objects"][event["objectid"]]["movestartframe"] = int(job["fps"] *  event["time"])
-            # job["objects"][event["objectid"]]["movetolocation"] = event["moveto"]
-            # job["objects"][event["objectid"]]["movespeed"] = event["speed"] #xx points per second
-            # job["objects"][event["objectid"]]["movespeedinframe"] = int(event["speed"] / job["fps"])   # xx points per frame
-            # job["objects"][event["objectid"]]["movecurve"] = event["track"]
-            # job["objects"][event["objectid"]]["moveleavetrace"] = event["leavetrace"]
-            # #job["objects"][event["objectid"]]["moveendtime"] = event["leavetrace"]
-            # job["objects"][event["objectid"]]["moveendframe"] = calculatemoveendframe(job["objects"][event["objectid"]])
+
 
         if event["action"] == "end":
             job["endtime"] = event["time"]
             job["endframe"] = int(job["fps"] *  event["time"])
-
-
 
 
 def work(job):
@@ -67,7 +61,8 @@ def work(job):
                                    job["fps"],
                                    [job["canvas_size"][1],  job["canvas_size"][0]]
                                    )
-    canvas = np.zeros((job["canvas_size"][0], job["canvas_size"][1], 3), dtype="uint8")
+
+    canvas = np.full((job["canvas_size"][0], job["canvas_size"][1], 3), job["canvas_color"], dtype="uint8")
     for i in range(job["endframe"]):
         for _objectid in job["objects"]:
             _object = job["objects"][_objectid]
@@ -80,12 +75,13 @@ def work(job):
                             # this is for "straight line" moving.
                             if "movestep" not in moveaction:    # initialize move step base on current location
                                 moveaction["movestartlocation"] = copy.deepcopy(_object['location'])
-                                moveaction["movestep"] = calculatemoveendframe( moveaction)
+                                moveaction["movestep"] = calculatemovestep( moveaction)
                             _object["location"][0] = int(moveaction["movestartlocation"][0] +  (i-moveaction["movestartframe"]) * moveaction["movestep"][0])
                             _object["location"][1] = int(moveaction["movestartlocation"][1] +  (i-moveaction["movestartframe"]) * moveaction["movestep"][1])
                             _object["location"][0] = min(max(_object["location"][0], 0), canvas.shape[0])
                             _object["location"][1] = min(max(_object["location"][1], 0), canvas.shape[1])
 
+                # place _object["img"] in canvas, in the _object["location"].
                 height = _object["img"].shape[0]
                 if _object["location"][0] + height > canvas.shape[0]:
                     height = canvas.shape[0]-_object["location"][0]
@@ -102,7 +98,7 @@ def work(job):
                 for c in range(0, 3):
                     canvas[y1:y2, x1:x2, c] = (alpha_s * _object["img"][:height, :width, c] +
                                               alpha_l * canvas[y1:y2, x1:x2, c])
-        cv2.imwrite(os.path.join(job["tempfolder"], f"{i}.png"), canvas)
+        #cv2.imwrite(os.path.join(job["tempfolder"], f"{i}.png"), canvas)
         video_writer.write(canvas)
     # use ffmpeg to compbine them using the specify fps
     # "ffmpeg -r 1/5 -start_number 2 -i img%03d.png -c:v libx264 -r 30 -pix_fmt yuv420p out.mp4"
